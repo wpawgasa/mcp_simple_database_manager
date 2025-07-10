@@ -66,8 +66,7 @@ async def run_example_client():
             users = json.loads(extract_text_content(result))
             print("   Users:")
             for user in users:
-                print(
-                    f"     👤 {user['name']} ({user['email']}) - Age: {user['age']}")
+                print(f"     👤 {user['name']} ({user['email']}) - Age: {user['age']}")
 
             # Example 4: List Ollama models
             print("🤖 Example 4: Listing available Ollama models...")
@@ -77,8 +76,7 @@ async def run_example_client():
             # Example 5: Chat with Ollama
             print("💬 Example 5: Chatting with Ollama...")
             result = await session.call_tool(
-                "chat_with_ollama", {
-                    "prompt": "Explain what a database is in one sentence.", "model": "llama3.2"}
+                "chat_with_ollama", {"prompt": "Explain what a database is in one sentence.", "model": "llama3.2"}
             )
             print(f"   🤖 Ollama: {extract_text_content(result)}")
 
@@ -86,8 +84,7 @@ async def run_example_client():
             print("🔧 Example 6: Generating SQL with LlamaIndex...")
             result = await session.call_tool(
                 "generate_sql_with_llamaindex",
-                {"description": "Find all users older than 25 years",
-                    "model": "llama3.2"},
+                {"description": "Find all users older than 25 years", "model": "llama3.2"},
             )
             print(f"   {extract_text_content(result)}")
 
@@ -95,8 +92,7 @@ async def run_example_client():
             print("📊 Example 7: Analyzing data with LlamaIndex...")
             result = await session.call_tool(
                 "analyze_database_with_llamaindex",
-                {"question": "What insights can you provide about the users in the database?",
-                    "model": "llama3.2"},
+                {"question": "What insights can you provide about the users in the database?", "model": "llama3.2"},
             )
             print(f"   📈 Analysis: {extract_text_content(result)}")
 
@@ -178,12 +174,10 @@ async def interactive_client():
                         print(f"✅ {extract_text_content(result)}")
                     elif command == "schema":
                         result = await session.call_tool("get_database_schema", {})
-                        print(json.dumps(json.loads(
-                            extract_text_content(result)), indent=2))
+                        print(json.dumps(json.loads(extract_text_content(result)), indent=2))
                     elif command == "users":
                         result = await session.call_tool("query_database", {"sql": "SELECT * FROM users"})
-                        print(json.dumps(json.loads(
-                            extract_text_content(result)), indent=2))
+                        print(json.dumps(json.loads(extract_text_content(result)), indent=2))
                     elif command == "models":
                         result = await session.call_tool("list_ollama_models", {})
                         print(extract_text_content(result))
@@ -195,13 +189,11 @@ async def interactive_client():
                         query = command[4:]
                         if query.strip().upper().startswith("SELECT"):
                             result = await session.call_tool("query_database", {"sql": query})
-                            print(json.dumps(json.loads(
-                                extract_text_content(result)), indent=2))
+                            print(json.dumps(json.loads(extract_text_content(result)), indent=2))
                         else:
                             print("❌ Only SELECT queries are allowed for safety")
                     else:
-                        print(
-                            "❓ Unknown command. Type 'help' for available commands.")
+                        print("❓ Unknown command. Type 'help' for available commands.")
 
                 except KeyboardInterrupt:
                     break

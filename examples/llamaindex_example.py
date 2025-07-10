@@ -15,6 +15,8 @@ from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 from mcp.types import CallToolResult, TextContent
 
+from utilities import extract_text_content
+
 
 async def llamaindex_example():
     """Advanced example demonstrating LlamaIndex features."""
@@ -36,7 +38,7 @@ async def llamaindex_example():
             print("\n📝 Setting up sample data...")
             result = await session.call_tool("insert_sample_data", {})
             if result.content and isinstance(result.content[0], TextContent):
-                print(f"   {result.content[0].text}")
+                print(f"   {extract_text_content(result)}")
 
             # Add more sample data for better analysis
             print("\n📊 Adding additional sample data...")
@@ -72,9 +74,10 @@ async def llamaindex_example():
                 print(f"\n   Question: '{question}'")
                 try:
                     result = await session.call_tool(
-                        "generate_sql_with_llamaindex", {"description": question, "model": "llama3.2"}
+                        "generate_sql_with_llamaindex", {
+                            "description": question, "model": "llama3.2"}
                     )
-                    print(f"   Generated SQL: {result.content[0].text}")
+                    print(f"   Generated SQL: {extract_text_content(result)}")
                 except Exception as e:
                     print(f"   Error: {e}")
 
@@ -90,9 +93,10 @@ async def llamaindex_example():
                 print(f"\n   Analyzing: '{question}'")
                 try:
                     result = await session.call_tool(
-                        "analyze_database_with_llamaindex", {"question": question, "model": "llama3.2"}
+                        "analyze_database_with_llamaindex", {
+                            "question": question, "model": "llama3.2"}
                     )
-                    print(f"   Analysis:\n   {result.content[0].text}")
+                    print(f"   Analysis:\n   {extract_text_content(result)}")
                     print("   " + "-" * 40)
                 except Exception as e:
                     print(f"   Error: {e}")
@@ -102,7 +106,7 @@ async def llamaindex_example():
 
             # Get current database state for context
             schema_result = await session.call_tool("get_database_schema", {})
-            schema = json.loads(schema_result.content[0].text)
+            schema = json.loads(extract_text_content(schema_result))
 
             context = f"""
             Database Context:
@@ -122,9 +126,10 @@ async def llamaindex_example():
                 print(f"\n   User: {message}")
                 try:
                     result = await session.call_tool(
-                        "chat_with_context", {"message": message, "context": context, "model": "llama3.2"}
+                        "chat_with_context", {
+                            "message": message, "context": context, "model": "llama3.2"}
                     )
-                    print(f"   AI: {result.content[0].text}")
+                    print(f"   AI: {extract_text_content(result)}")
                 except Exception as e:
                     print(f"   Error: {e}")
 
@@ -133,14 +138,17 @@ async def llamaindex_example():
 
             # First, get some actual data
             users_result = await session.call_tool(
-                "query_database", {"sql": "SELECT COUNT(*) as total_users, AVG(age) as avg_age FROM users"}
+                "query_database", {
+                    "sql": "SELECT COUNT(*) as total_users, AVG(age) as avg_age FROM users"}
             )
             products_result = await session.call_tool(
-                "query_database", {"sql": "SELECT COUNT(*) as total_products, AVG(price) as avg_price FROM products"}
+                "query_database", {
+                    "sql": "SELECT COUNT(*) as total_products, AVG(price) as avg_price FROM products"}
             )
 
-            users_stats = json.loads(users_result.content[0].text)[0]
-            products_stats = json.loads(products_result.content[0].text)[0]
+            users_stats = json.loads(extract_text_content(users_result))[0]
+            products_stats = json.loads(
+                extract_text_content(products_result))[0]
 
             data_context = f"""
             Current Database Statistics:
@@ -161,7 +169,8 @@ async def llamaindex_example():
                         "model": "llama3.2",
                     },
                 )
-                print(f"\n   💡 Business Insights:\n   {result.content[0].text}")
+                print(
+                    f"\n   💡 Business Insights:\n   {extract_text_content(result)}")
             except Exception as e:
                 print(f"   Error: {e}")
 
