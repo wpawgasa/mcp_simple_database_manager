@@ -39,7 +39,8 @@ class TestOllamaLlamaIndexClient:
         with patch("mcp_simple_db_access.server.get_ollama_llm") as mock_get_llm:
             # Mock LLM to raise an exception
             mock_llm = MagicMock()
-            mock_llm.acomplete = AsyncMock(side_effect=Exception("Connection error"))
+            mock_llm.acomplete = AsyncMock(
+                side_effect=Exception("Connection error"))
             mock_get_llm.return_value = mock_llm
 
             result = await client.generate("llama3.2", "Test prompt")
@@ -55,7 +56,8 @@ class TestOllamaLlamaIndexClient:
         # Mock successful HTTP response
         mock_response = MagicMock()
         mock_response.raise_for_status.return_value = None
-        mock_response.json.return_value = {"models": [{"name": "llama3.2"}, {"name": "gemma2"}, {"name": "codellama"}]}
+        mock_response.json.return_value = {"models": [
+            {"name": "llama3.2"}, {"name": "gemma2"}, {"name": "codellama"}]}
 
         with patch("httpx.AsyncClient") as mock_client_class:
             mock_client = AsyncMock()
@@ -67,7 +69,8 @@ class TestOllamaLlamaIndexClient:
             models = await client.list_models()
 
             assert models == ["llama3.2", "gemma2", "codellama"]
-            mock_client.get.assert_called_once_with("http://localhost:11434/api/tags")
+            mock_client.get.assert_called_once_with(
+                "http://localhost:11434/api/tags")
 
     @pytest.mark.asyncio
     async def test_list_models_empty_response(self):
@@ -98,7 +101,8 @@ class TestOllamaLlamaIndexClient:
             mock_client = AsyncMock()
             mock_client.__aenter__.return_value = mock_client
             mock_client.__aexit__.return_value = None
-            mock_client.get.side_effect = httpx.ConnectError("Connection failed")
+            mock_client.get.side_effect = httpx.ConnectError(
+                "Connection failed")
             mock_client_class.return_value = mock_client
 
             models = await client.list_models()
@@ -155,7 +159,8 @@ class TestOllamaLLMFunction:
         result = get_ollama_llm()
 
         mock_ollama_class.assert_called_once_with(
-            model="gemma3n", base_url="http://localhost:11434", request_timeout=60.0  # DEFAULT_MODEL from server
+            # DEFAULT_MODEL from server
+            model="llama3.2", base_url="http://localhost:11434", request_timeout=60.0
         )
         assert result == mock_instance
 

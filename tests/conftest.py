@@ -16,6 +16,7 @@ from typing import AsyncGenerator, Dict, Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+import pytest_asyncio
 import aiosqlite
 from mcp import ClientSession, ServerSession
 from mcp.server.stdio import stdio_server
@@ -35,7 +36,7 @@ def event_loop():
     loop.close()
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def temp_db() -> AsyncGenerator[str, None]:
     """Create a temporary database for testing."""
     with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
@@ -51,7 +52,7 @@ async def temp_db() -> AsyncGenerator[str, None]:
     Path(temp_db_path).unlink(missing_ok=True)
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def db_manager(temp_db: str) -> DatabaseManager:
     """Create a DatabaseManager instance with test database."""
     return DatabaseManager(temp_db)
@@ -70,15 +71,17 @@ def mock_ollama_client():
     return client
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def populated_db(db_manager: DatabaseManager) -> DatabaseManager:
     """Database manager with sample data inserted."""
     # Insert test users
     await db_manager.execute_write(
-        "INSERT INTO users (name, email, age) VALUES (?, ?, ?)", ("Test User 1", "test1@example.com", 25)
+        "INSERT INTO users (name, email, age) VALUES (?, ?, ?)", (
+            "Test User 1", "test1@example.com", 25)
     )
     await db_manager.execute_write(
-        "INSERT INTO users (name, email, age) VALUES (?, ?, ?)", ("Test User 2", "test2@example.com", 30)
+        "INSERT INTO users (name, email, age) VALUES (?, ?, ?)", (
+            "Test User 2", "test2@example.com", 30)
     )
 
     # Insert test products
@@ -93,7 +96,8 @@ async def populated_db(db_manager: DatabaseManager) -> DatabaseManager:
 
     # Insert test orders
     await db_manager.execute_write(
-        "INSERT INTO orders (user_id, product_id, quantity, total_price) VALUES (?, ?, ?, ?)", (1, 1, 2, 199.98)
+        "INSERT INTO orders (user_id, product_id, quantity, total_price) VALUES (?, ?, ?, ?)", (
+            1, 1, 2, 199.98)
     )
 
     return db_manager
@@ -158,7 +162,7 @@ class MockMCPServer:
                 raise ValueError(f"Unknown tool: {tool_name}")
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def mock_mcp_server(db_manager: DatabaseManager, mock_ollama_client) -> MockMCPServer:
     """Create a mock MCP server for testing."""
     return MockMCPServer(db_manager, mock_ollama_client)

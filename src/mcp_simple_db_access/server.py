@@ -11,6 +11,7 @@ This server provides tools for:
 
 import asyncio
 import json
+import os
 import aiosqlite
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
@@ -29,7 +30,7 @@ from llama_index.core.llms.llm import LLM
 mcp = FastMCP("mcp-simple-db-access")
 
 # Constants
-OLLAMA_BASE_URL = "http://localhost:11434"
+OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 DEFAULT_MODEL = "llama3.2"
 DB_PATH = "data/app.db"
 
@@ -85,7 +86,8 @@ class OllamaLlamaIndexClient:
         try:
             llm = get_ollama_llm(model, self.base_url)
             # Convert messages to a single prompt for completion
-            prompt = "\n".join([f"{msg['role']}: {msg['content']}" for msg in messages])
+            prompt = "\n".join(
+                [f"{msg['role']}: {msg['content']}" for msg in messages])
             response = await llm.acomplete(prompt)
             return str(response)
         except Exception as e:
@@ -198,10 +200,12 @@ async def insert_sample_data() -> str:
     try:
         # Insert sample users
         await db_manager.execute_write(
-            "INSERT OR IGNORE INTO users (name, email, age) VALUES (?, ?, ?)", ("John Doe", "john@example.com", 30)
+            "INSERT OR IGNORE INTO users (name, email, age) VALUES (?, ?, ?)", (
+                "John Doe", "john@example.com", 30)
         )
         await db_manager.execute_write(
-            "INSERT OR IGNORE INTO users (name, email, age) VALUES (?, ?, ?)", ("Jane Smith", "jane@example.com", 25)
+            "INSERT OR IGNORE INTO users (name, email, age) VALUES (?, ?, ?)", (
+                "Jane Smith", "jane@example.com", 25)
         )
 
         # Insert sample products
@@ -307,7 +311,8 @@ async def get_database_schema() -> str:
             count_result = await db_manager.execute_query(count_query)
             row_count = count_result[0]["count"] if count_result else 0
 
-            schema_info[table_name] = {"columns": schema, "row_count": row_count}
+            schema_info[table_name] = {
+                "columns": schema, "row_count": row_count}
 
         return json.dumps(schema_info, indent=2)
 
@@ -449,7 +454,7 @@ async def main():
     await db_manager.init_db()
 
     # Run the server
-    mcp.run(transport="stdio")
+    await mcp.run_stdio_async()
 
 
 if __name__ == "__main__":
